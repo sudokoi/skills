@@ -2,6 +2,7 @@
 # The installer runs: npx skills add <repo> --skill <skill> --global --yes --agent <agent>
 
 sudokoi/skills commit-style
+sudokoi/skills github-workflow
 aidrecabrera/bulletproof-react-skill bulletproof-react-architecture
 chrisbanes/skills kotlin-api-design
 chrisbanes/skills kotlin-concurrency-and-flow

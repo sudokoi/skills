@@ -15,6 +15,7 @@ dotfiles repo: it holds both my own custom skills and the third-party skills I u
     the opencode slash-command wrappers.
   - [`commands/`](setup-skills/commands) — the opencode slash commands themselves.
 - [`commit-style/`](commit-style/SKILL.md) — my custom commit conventions.
+- [`github-workflow/`](github-workflow/SKILL.md) — my GitHub Actions conventions.
 
 ## Custom skills
 
