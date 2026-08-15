@@ -57,15 +57,3 @@ npx skills add <repo> --skill <name> --global --yes --agent <agent>
 ```
 
 Re-running is idempotent: the CLI overwrites already-installed skills without error.
-
-## Out of scope
-
-`inventory.tsv` deliberately excludes two groups of skills:
-
-- **Cloudflare** — the official `cloudflare`, `wrangler`, `workers-best-practices`,
-  `durable-objects`, and related skills are installed by Cloudflare's own tooling,
-  not by this repo.
-- **`chrisbanes/skills` Compose & workflow** — `compose-*`, `shepherd`, `to-plan`,
-  and `run-github-project` are skipped; only the core Kotlin skills
-  (`kotlin-api-design`, `kotlin-concurrency-and-flow`, `kotlin-control-flow`) are
-  installed.

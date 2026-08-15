@@ -41,14 +41,6 @@ via `scripts/write-commands.sh` (the `--commands` flag). Re-running is idempoten
 - `.github/workflows/install.yml` — on `main` and weekly: smoke-tests the real
   install and verifies every inventory skill lands in `~/.agents/skills`.
 
-## Out of scope
-
-`inventory.tsv` deliberately excludes:
-
-- Cloudflare skills — installed by Cloudflare's own tooling, not this repo.
-- `chrisbanes/skills` Compose/workflow skills — only the Kotlin core skills
-  (`kotlin-api-design`, `kotlin-concurrency-and-flow`, `kotlin-control-flow`) are used.
-
 ## Conventions
 
 - One folder per skill; a skill is just a `SKILL.md` plus optional helper files.
