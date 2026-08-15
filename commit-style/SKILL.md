@@ -1,6 +1,6 @@
 ---
 name: commit-style
-description: Encodes the user's git commit conventions: Conventional Commits with a short title and a concise pointwise body, and atomic commits made only when a logical change is complete. Use when writing commit messages, staging or committing changes, squashing, or when asked to "commit this", "write a commit message", or "make a commit".
+description: Encodes the user's git commit conventions (Conventional Commits with a short title and a concise pointwise body, and atomic commits made only when a logical change is complete). Use when writing commit messages, staging or committing changes, squashing, or when asked to "commit this", "write a commit message", or "make a commit".
 ---
 
 # Commit Style
