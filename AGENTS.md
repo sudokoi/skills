@@ -2,112 +2,73 @@
 
 ## What this repo is
 
-A version-controlled home for my agent skills — the "skills" equivalent of a dotfiles
-repo. The goal: reproduce my exact agent/skill setup on any machine with a single
-`setup-skills` skill, instead of hand-installing skills one by one.
+A version-controlled home for my agent skills — the "skills" equivalent of a
+dotfiles repo. It holds two kinds of skills:
 
-## Current state
+- **Self-authored skills** — one top-level `<name>/SKILL.md` folder each:
+  - `setup-skills/` — the bootstrap skill that installs everything else on a fresh machine.
+  - `commit-style/` — my commit conventions.
+  - `github-workflow/` — my GitHub Actions conventions.
+- **Third-party skills** — not vendored here; they are listed in
+  `setup-skills/scripts/inventory.tsv` and installed from their upstream repos.
 
-- Repo exists but is empty (this file is the first thing in it).
-- The machine already has a working setup (see "Skill inventory" below) installed
-  globally, plus a set of opencode slash commands.
-- Nothing here yet packages that setup for reuse. That's the task.
+## Reproducing the setup
 
-## Immediate task — write the `setup-skills` skill
+On a fresh machine, install the bootstrap skill and run it:
 
-Create `setup-skills/SKILL.md` (and any helper scripts) that, when invoked by an
-agent, reproduces the setup below on a fresh machine. Requirements the user asked for:
+    npx skills add sudokoi/skills --skill setup-skills --global --yes --agent opencode
 
-- **Agent prompt during install:** the skill must ask which agents to support
-  (opencode, claude, cursor, codex, gemini, etc.) rather than hardcoding opencode.
-- Install each skill from its source repo via the skills CLI (see below).
-- Optionally (re)create the opencode slash commands in `~/.config/opencode/commands/`.
-- Idempotent: re-running should not error if a skill is already installed.
+`setup-skills` asks which agents to support, then installs every skill listed in
+`setup-skills/scripts/inventory.tsv` via:
 
-Use the exact `npx skills add` invocation shape documented in "Technical reference".
-The `--agent <name>` flag accepts a single agent name; to support multiple agents
-the skill should loop over the user's chosen list.
+    npx skills add <repo> --skill <name> --global --yes --agent <agent>
 
-## Skill inventory (what "setup" must reproduce)
+It can also (re)create the opencode slash commands from `setup-skills/commands/`
+via `scripts/write-commands.sh` (the `--commands` flag). Re-running is idempotent.
 
-Skills installed globally, grouped by source repo. All were installed with:
+## Adding a custom skill
 
-    npx skills add <repo> --skill <name> --global --yes --agent opencode
+1. Create `<name>/SKILL.md` — frontmatter `name` (lowercase, hyphenated, matches
+   the folder) and a required `description`.
+2. Register it in `setup-skills/scripts/inventory.tsv` as `sudokoi/skills <name>`.
+3. Run `python3 scripts/validate.py` to check the metadata.
+4. Commit following the `commit-style` skill.
 
-### Installed in this session (exact source repos confirmed)
+## CI
 
-| Skill | Source repo |
-|---|---|
-| design-taste-frontend | leonxlnx/taste-skill |
-| agent-browser | vercel-labs/agent-browser |
-| codebase-architecture | mblode/agent-skills |
-| codebase-design | mattpocock/skills |
-| domain-modeling | mattpocock/skills |
-| frontend-architecture | sickn33/agentic-awesome-skills |
-| vercel-composition-patterns | vercel-labs/agent-skills |
-| vercel-react-best-practices | vercel-labs/agent-skills |
-| vercel-react-native-skills | vercel-labs/agent-skills |
-| tdd | mattpocock/skills |
-| bulletproof-react-architecture | aidrecabrera/bulletproof-react-skill |
-| shadcn | shadcn/ui |
-| diagnosing-bugs | mattpocock/skills |
-| code-review | mattpocock/skills |
-| kotlin-concurrency-and-flow | chrisbanes/skills |
-| kotlin-api-design | chrisbanes/skills |
-| kotlin-control-flow | chrisbanes/skills |
-| kotlin-tooling-agp9-migration | Kotlin/kotlin-agent-skills |
-| find-skills | vercel-labs/skills |
-| grill-me | mattpocock/skills |
-| improve-codebase-architecture | mattpocock/skills |
+- `.github/workflows/ci.yml` — on every push: `scripts/validate.py` (frontmatter,
+  inventory, slash-command references) plus `bash -n` and `shellcheck` on the scripts.
+- `.github/workflows/install.yml` — on `main` and weekly: smoke-tests the real
+  install and verifies every inventory skill lands in `~/.agents/skills`.
 
-### Explicitly out of scope (do not install)
+## Out of scope
 
-- Cloudflare skills (`agents-sdk`, `cloudflare`, `cloudflare-email-service`,
-  `durable-objects`, `sandbox-sdk`, `turnstile-spin`, `web-perf`,
-  `workers-best-practices`, `wrangler`) — skip these.
-- `chrisbanes/skills` Compose-only / workflow skills (`compose-*`,
-  `run-github-project`, `shepherd`, `to-plan`, `using-chrisbanes-skills`) — skip.
+`inventory.tsv` deliberately excludes:
 
-## Slash commands inventory
+- Cloudflare skills — installed by Cloudflare's own tooling, not this repo.
+- `chrisbanes/skills` Compose/workflow skills — only the Kotlin core skills
+  (`kotlin-api-design`, `kotlin-concurrency-and-flow`, `kotlin-control-flow`) are used.
 
-OpenCode custom commands live in `~/.config/opencode/commands/<name>.md` (frontmatter:
-`description`, optional `agent`/`model`; body = prompt template; `$ARGUMENTS` =
-positional args). Commands currently defined:
+## Conventions
 
-`agent-browser`, `agp-migration`, `build-agent`, `bulletproof-react`,
-`cloudflare`, `cloudflare-email`, `code-review`, `codebase-architecture`,
-`codebase-design`, `composition-patterns`, `design-taste`, `diagnose-bugs`,
-`domain-modeling`, `durable-objects`, `find-skill`, `frontend-architecture`,
-`grill-me`, `improve-arch`, `kotlin-api`, `kotlin-control-flow`, `kotlin-flow`,
-`react-native`, `react-perf`, `sandbox`, `shadcn`, `tdd`, `turnstile`,
-`web-perf`, `workers-review`, `wrangler`.
-
-Each command's body is one line: "Load the <skill> skill and <apply it>
-[optional $ARGUMENTS]." (A command that merely loads a skill is the supported
-bridge — skills themselves are not slash commands.)
+- One folder per skill; a skill is just a `SKILL.md` plus optional helper files.
+- Follow the `commit-style` skill for commits and the `github-workflow` skill for
+  workflow changes.
+- Do not commit secrets or personal tokens.
+- Target audience is me (React + React Native, Kotlin native modules, Cloudflare),
+  but `setup-skills` should ask rather than assume.
 
 ## Technical reference
 
-**Where opencode discovers skills** (from https://opencode.ai/docs/skills/):
+**Where opencode discovers skills** (https://opencode.ai/docs/skills/):
 - Project: `.opencode/skills/<name>/SKILL.md`, `.claude/skills/...`, `.agents/skills/...`
 - Global: `~/.config/opencode/skills/...`, `~/.claude/skills/...`, `~/.agents/skills/...`
 - Each skill = a folder with a `SKILL.md` whose frontmatter has `name` (lowercase,
   hyphen-separated, must match folder name) and `description` (required).
-- Agents load skills via the `skill` tool; there is no native slash-command trigger
-  for a skill — hence the wrapper commands above.
 
 **skills.sh CLI** (`npx skills`):
 - `npx skills add <owner/repo-or-url> --skill <name>` installs one skill.
-- `--global` installs to `~/.agents/skills` (universal) instead of project-local.
-- `--yes` skips prompts; `--agent <name>` selects a target agent (e.g. `opencode`,
-  `claude`, `cursor`); omit `--agent` for all detected agents.
-- Omitting `--skill` shows the repo's available skills interactively.
-
-## Conventions
-
-- One folder per skill; the `setup-skills` skill is itself a normal skill
-  (`setup-skills/SKILL.md`).
-- Keep `SKILL.md` names lowercase + hyphenated, matching their folder names.
-- Do not commit secrets or personal tokens.
-- Target audience for this repo: me (React + React Native dev, Kotlin native
-  modules, Cloudflare) — but the setup skill should ask, not assume.
+- `--global` installs to `~/.agents/skills` (universal); `--yes` skips prompts.
+- `--agent <name>` selects a target agent (repeat for multiple, or omit for all
+  detected agents).
+- `--copy` copies instead of symlinking; `--full-depth` finds nested skills.
