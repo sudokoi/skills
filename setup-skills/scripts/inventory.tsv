@@ -1,5 +1,9 @@
 # One <repo> <skill> pair per line. `#` starts a comment. Blank lines are ignored.
 # The installer runs: npx skills add <repo> --skill <skill> --global --yes --agent <agent>
+#
+# Self skills (this repo) are installed from the repo's remote. Once this repo is
+# pushed, uncomment and replace <owner>/<repo> with the real name:
+# <owner>/<repo> commit-style
 
 aidrecabrera/bulletproof-react-skill bulletproof-react-architecture
 chrisbanes/skills kotlin-api-design
