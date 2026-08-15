@@ -54,8 +54,3 @@ the command files in place.
 
 Edit `scripts/inventory.tsv` (one `<repo> <skill>` pair per line, `#` for comments)
 and commit. Re-running this skill on any machine converges to the new set.
-
-## Out of scope
-
-Cloudflare skills and `chrisbanes/skills` Compose/workflow skills are deliberately
-not listed in the inventory; they are managed separately.
