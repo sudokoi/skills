@@ -1,0 +1,45 @@
+name: Install smoke test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+  push:
+    branches: [main]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install skills
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash setup-skills/scripts/install.sh --agents opencode
+
+      - name: Verify installed skills
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+
+          missing = []
+          for line in Path("setup-skills/scripts/inventory.tsv").read_text().splitlines():
+              s = line.strip()
+              if not s or s.startswith("#"):
+                  continue
+              _, skill = s.split()
+              if not Path.home().joinpath(".agents", "skills", skill, "SKILL.md").exists():
+                  missing.append(skill)
+
+          if missing:
+              print("missing installed skills:", ", ".join(missing))
+              sys.exit(1)
+          print("all inventory skills installed")
+          PY
