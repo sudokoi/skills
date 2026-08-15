@@ -21,7 +21,7 @@ dotfiles repo: it holds both my own custom skills and the third-party skills I u
 
 Custom skills live in this repo as `<name>/SKILL.md` and are installed like any
 other skill, with the repo itself as the source. Add them to `inventory.tsv` as
-`<owner>/<repo> <skill>` (e.g. `<owner>/<repo> commit-style`) so `setup-skills`
+`<owner>/<repo> <skill>` (e.g. `sudokoi/skills commit-style`) so `setup-skills`
 installs them on every machine. `setup-skills` itself is the entry point and stays
 out of the inventory.
 
@@ -31,7 +31,7 @@ Install the skill, then run it. It prompts for which agents to support and wheth
 to write the opencode slash commands.
 
 ```bash
-npx skills add <this-repo> --skill setup-skills --global --yes --agent opencode
+npx skills add sudokoi/skills --skill setup-skills --global --yes --agent opencode
 ```
 
 Then ask an agent to **Load the `setup-skills` skill and set up my skills**, or run
@@ -60,5 +60,12 @@ Re-running is idempotent: the CLI overwrites already-installed skills without er
 
 ## Out of scope
 
-Cloudflare skills and `chrisbanes/skills` Compose/workflow skills are intentionally
-not tracked here; they're managed separately.
+`inventory.tsv` deliberately excludes two groups of skills:
+
+- **Cloudflare** — the official `cloudflare`, `wrangler`, `workers-best-practices`,
+  `durable-objects`, and related skills are installed by Cloudflare's own tooling,
+  not by this repo.
+- **`chrisbanes/skills` Compose & workflow** — `compose-*`, `shepherd`, `to-plan`,
+  and `run-github-project` are skipped; only the core Kotlin skills
+  (`kotlin-api-design`, `kotlin-concurrency-and-flow`, `kotlin-control-flow`) are
+  installed.
