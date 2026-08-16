@@ -19,25 +19,31 @@ jobs:
       - name: Install skills
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash setup-skills/scripts/install.sh --agents opencode
+        run: bash setup-skills/scripts/install.sh --agents opencode --include-optional
 
       - name: Verify installed skills
         run: |
           python3 - <<'PY'
-          import sys
+          import subprocess, sys
           from pathlib import Path
 
-          missing = []
-          for line in Path("setup-skills/scripts/inventory.tsv").read_text().splitlines():
-              s = line.strip()
-              if not s or s.startswith("#"):
-                  continue
-              _, skill = s.split()
-              if not Path.home().joinpath(".agents", "skills", skill, "SKILL.md").exists():
-                  missing.append(skill)
-
+          # Consume the installer's own plan instead of re-parsing the inventory.
+          plan = subprocess.run(
+              ["bash", "setup-skills/scripts/install.sh", "--agents", "opencode",
+               "--include-optional", "--dry-run"],
+              capture_output=True, text=True, check=True,
+          ).stdout
+          planned = [
+              line.split()[1]
+              for line in plan.splitlines()
+              if line.startswith("[plan]")
+          ]
+          missing = [
+              s for s in planned
+              if not Path.home().joinpath(".agents", "skills", s, "SKILL.md").exists()
+          ]
           if missing:
               print("missing installed skills:", ", ".join(missing))
               sys.exit(1)
-          print("all inventory skills installed")
+          print(f"all {len(planned)} planned skills installed")
           PY
