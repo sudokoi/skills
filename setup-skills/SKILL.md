@@ -28,14 +28,16 @@ the upstream repos and is easy to maintain (add/remove one line to change the se
 
 3. **Install the skills.** The installer and inventory live in `scripts/`, next to
    this `SKILL.md` (i.e. `<repo>/setup-skills/scripts/install.sh` when using the
-   repo checkout). Run it with a comma-separated agent list (pass `--commands` to
-   also write the slash commands):
+   repo checkout). Run it with a comma-separated agent list. Ask whether to include
+   the optional skills too — pass `--include-optional` if yes, and `--commands` to
+   also write the slash commands:
 
    ```bash
-   bash setup-skills/scripts/install.sh --agents opencode,cursor,codex --commands
+   bash setup-skills/scripts/install.sh --agents opencode,cursor,codex --commands --include-optional
    ```
 
-   The script loops over every agent and installs each inventory skill with:
+   The script loops over every agent and installs each recommended inventory skill
+   (and the `optional:` ones when `--include-optional` is passed) with:
 
    ```text
    npx skills add <repo> --skill <name> --global --yes --agent <agent>
@@ -52,5 +54,6 @@ the command files in place.
 
 ## Adding / removing a skill
 
-Edit `scripts/inventory.tsv` (one `<repo> <skill>` pair per line, `#` for comments)
-and commit. Re-running this skill on any machine converges to the new set.
+Edit `scripts/inventory.tsv` (one `<repo> <skill>` pair per line, `#` for comments;
+prefix a line with `optional:` to make the skill optional) and commit. Re-running
+this skill on any machine converges to the new set.

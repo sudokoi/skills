@@ -1,8 +1,11 @@
 # One <repo> <skill> pair per line. `#` starts a comment. Blank lines are ignored.
+# Recommended skills are listed bare; optional skills start with `optional:` and are
+# only installed when the installer runs with --include-optional.
 # The installer runs: npx skills add <repo> --skill <skill> --global --yes --agent <agent>
 
 sudokoi/skills commit-style
 sudokoi/skills github-workflow
+optional: dmmulroy/anti-slop install-anti-slop
 aidrecabrera/bulletproof-react-skill bulletproof-react-architecture
 chrisbanes/skills kotlin-api-design
 chrisbanes/skills kotlin-concurrency-and-flow

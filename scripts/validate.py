@@ -35,12 +35,22 @@ for skmd in sorted(ROOT.glob("*/SKILL.md")):
     if not desc_m:
         errors.append(f"{skmd.relative_to(ROOT)}: frontmatter missing 'description'")
 
-# 2. Inventory format + duplicates.
+# 2. Inventory format + categories + duplicates.
 inventory_names = set()
 for i, line in enumerate(INVENTORY.read_text().splitlines(), 1):
     s = line.strip()
     if not s or s.startswith("#"):
         continue
+    if s.startswith("optional:"):
+        s = s[len("optional:"):].strip()
+    else:
+        first = s.split(maxsplit=1)[0]
+        if first.endswith(":"):
+            errors.append(
+                f"{INVENTORY.relative_to(ROOT)}:{i}: unknown category "
+                f"'{first.rstrip(':')}' (known: recommended, optional)"
+            )
+            continue
     parts = s.split()
     if len(parts) != 2:
         errors.append(f"{INVENTORY.relative_to(ROOT)}:{i}: expected '<repo> <skill>', got {len(parts)} fields")

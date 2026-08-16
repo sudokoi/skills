@@ -14,6 +14,7 @@ canonical_agent() {
 
 AGENTS=""
 WITH_COMMANDS=0
+INCLUDE_OPTIONAL=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -25,16 +26,21 @@ while [[ $# -gt 0 ]]; do
       WITH_COMMANDS=1
       shift
       ;;
+    --include-optional)
+      INCLUDE_OPTIONAL=1
+      shift
+      ;;
     -h | --help)
       cat <<'USAGE'
-Usage: install.sh --agents <a,b,...> [--commands]
+Usage: install.sh --agents <a,b,...> [--commands] [--include-optional]
 
-  --agents <list>   Comma-separated agent names (opencode, cursor, codex, claude, gemini, ...).
-  --commands        Also (re)create the opencode slash commands in ~/.config/opencode/commands/.
+  --agents <list>       Comma-separated agent names (opencode, cursor, codex, claude, gemini, ...).
+  --commands            Also (re)create the opencode slash commands in ~/.config/opencode/commands/.
+  --include-optional    Also install skills marked `optional:` in the inventory.
 
 Examples:
   install.sh --agents opencode
-  install.sh --agents opencode,cursor,codex --commands
+  install.sh --agents opencode,cursor,codex --commands --include-optional
 USAGE
       exit 0
       ;;
@@ -69,11 +75,23 @@ echo
 
 count=0
 failed=0
-while read -r repo skill; do
-  [[ -z "$repo" || "$repo" == \#* ]] && continue
+skipped=0
+while read -r line; do
+  [[ -z "$line" || "$line" == \#* ]] && continue
+  category="recommended"
+  if [[ "$line" == optional:* ]]; then
+    category="optional"
+    line="${line#optional:}"
+    if [[ "$INCLUDE_OPTIONAL" -eq 0 ]]; then
+      skipped=$((skipped + 1))
+      echo "[skip] $line (optional; pass --include-optional to install)"
+      continue
+    fi
+  fi
+  read -r repo skill <<< "$line"
   for agent in "${AGENT_LIST[@]}"; do
     count=$((count + 1))
-    echo "[$count] $skill ($repo) -> $agent"
+    echo "[$count] $skill ($repo, $category) -> $agent"
     if ! npx --yes skills add "$repo" --skill "$skill" --global --yes --agent "$agent" </dev/null; then
       echo "error: failed to install $skill for $agent" >&2
       failed=$((failed + 1))
@@ -82,7 +100,7 @@ while read -r repo skill; do
 done < "$INVENTORY"
 
 echo
-echo "Done: $((count - failed))/$count installs succeeded."
+echo "Done: $((count - failed))/$count installs succeeded, $skipped optional skills skipped."
 if [[ "$failed" -gt 0 ]]; then
   exit 1
 fi
