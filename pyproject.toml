@@ -1,0 +1,5 @@
+[project]
+name = "skills-validation"
+version = "0.1.0"
+description = "Pure-stdlib validation scripts for the skills repo"
+requires-python = ">=3.8"
