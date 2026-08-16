@@ -4,86 +4,99 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-COMMANDS_DIR = ROOT / "setup-skills" / "commands"
-INVENTORY = ROOT / "setup-skills" / "scripts" / "inventory.tsv"
 BOOTSTRAP_SKILL = "setup-skills"
 
-errors = []
 
-# 1. Skill folders: valid frontmatter, name matches folder.
-skill_names = set()
-for skmd in sorted(ROOT.glob("*/SKILL.md")):
-    folder = skmd.parent.name
-    text = skmd.read_text()
-    m = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
-    if not m:
-        errors.append(f"{skmd.relative_to(ROOT)}: missing '---' frontmatter")
-        continue
-    fm = m.group(1)
-    name_m = re.search(r"^name:\s*(.+)$", fm, re.MULTILINE)
-    desc_m = re.search(r"^description:\s*(.+)$", fm, re.MULTILINE)
-    if not name_m:
-        errors.append(f"{skmd.relative_to(ROOT)}: frontmatter missing 'name'")
-    else:
-        name = name_m.group(1).strip()
-        if not re.fullmatch(r"[a-z0-9-]+", name):
-            errors.append(f"{skmd.relative_to(ROOT)}: name '{name}' must be lowercase, hyphen-separated")
-        if name != folder:
-            errors.append(f"{skmd.relative_to(ROOT)}: name '{name}' does not match folder '{folder}'")
-        skill_names.add(name)
-    if not desc_m:
-        errors.append(f"{skmd.relative_to(ROOT)}: frontmatter missing 'description'")
+def validate(root: Path, commands_dir: Path, inventory: Path):
+    """Run every rule against a repo layout. Returns (errors, skill_names, inventory_names)."""
+    errors = []
+    skill_names = set()
+    inventory_names = set()
 
-# 2. Inventory format + categories + duplicates.
-inventory_names = set()
-for i, line in enumerate(INVENTORY.read_text().splitlines(), 1):
-    s = line.strip()
-    if not s or s.startswith("#"):
-        continue
-    if s.startswith("optional:"):
-        s = s[len("optional:"):].strip()
-    else:
-        first = s.split(maxsplit=1)[0]
-        if first.endswith(":"):
-            errors.append(
-                f"{INVENTORY.relative_to(ROOT)}:{i}: unknown category "
-                f"'{first.rstrip(':')}' (known: recommended, optional)"
-            )
+    # 1. Skill folders: valid frontmatter, name matches folder.
+    for skmd in sorted(root.glob("*/SKILL.md")):
+        folder = skmd.parent.name
+        text = skmd.read_text()
+        m = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
+        if not m:
+            errors.append(f"{skmd.relative_to(root)}: missing '---' frontmatter")
             continue
-    parts = s.split()
-    if len(parts) != 2:
-        errors.append(f"{INVENTORY.relative_to(ROOT)}:{i}: expected '<repo> <skill>', got {len(parts)} fields")
-        continue
-    repo, skill = parts
-    if skill in inventory_names:
-        errors.append(f"{INVENTORY.relative_to(ROOT)}:{i}: duplicate skill '{skill}'")
-    inventory_names.add(skill)
+        fm = m.group(1)
+        name_m = re.search(r"^name:\s*(.+)$", fm, re.MULTILINE)
+        desc_m = re.search(r"^description:\s*(.+)$", fm, re.MULTILINE)
+        if not name_m:
+            errors.append(f"{skmd.relative_to(root)}: frontmatter missing 'name'")
+        else:
+            name = name_m.group(1).strip()
+            if not re.fullmatch(r"[a-z0-9-]+", name):
+                errors.append(f"{skmd.relative_to(root)}: name '{name}' must be lowercase, hyphen-separated")
+            if name != folder:
+                errors.append(f"{skmd.relative_to(root)}: name '{name}' does not match folder '{folder}'")
+            skill_names.add(name)
+        if not desc_m:
+            errors.append(f"{skmd.relative_to(root)}: frontmatter missing 'description'")
 
-# 3. Every self skill folder (except the bootstrap) is registered in the inventory.
-for name in sorted(skill_names):
-    if name != BOOTSTRAP_SKILL and name not in inventory_names:
-        errors.append(f"skill folder '{name}' is not listed in inventory.tsv")
+    # 2. Inventory format + categories + duplicates.
+    for i, line in enumerate(inventory.read_text().splitlines(), 1):
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        if s.startswith("optional:"):
+            s = s[len("optional:"):].strip()
+        else:
+            first = s.split(maxsplit=1)[0]
+            if first.endswith(":"):
+                errors.append(
+                    f"{inventory.relative_to(root)}:{i}: unknown category "
+                    f"'{first.rstrip(':')}' (known: recommended, optional)"
+                )
+                continue
+        parts = s.split()
+        if len(parts) != 2:
+            errors.append(f"{inventory.relative_to(root)}:{i}: expected '<repo> <skill>', got {len(parts)} fields")
+            continue
+        repo, skill = parts
+        if skill in inventory_names:
+            errors.append(f"{inventory.relative_to(root)}:{i}: duplicate skill '{skill}'")
+        inventory_names.add(skill)
 
-# 4. Every slash command references a skill in the inventory.
-command_targets = set()
-for cmd in sorted(COMMANDS_DIR.glob("*.md")):
-    m = re.search(r"Load the ([a-z0-9-]+) skill", cmd.read_text())
-    if not m:
-        errors.append(f"{cmd.name}: missing 'Load the <skill> skill' line")
-        continue
-    if m.group(1) not in inventory_names:
-        errors.append(f"{cmd.name}: references skill '{m.group(1)}' not in inventory.tsv")
-    command_targets.add(m.group(1))
+    # 3. Every self skill folder (except the bootstrap) is registered in the inventory.
+    for name in sorted(skill_names):
+        if name != BOOTSTRAP_SKILL and name not in inventory_names:
+            errors.append(f"skill folder '{name}' is not listed in inventory.tsv")
 
-# 5. Every inventory skill is reachable via a slash command.
-for name in sorted(inventory_names):
-    if name not in command_targets:
-        errors.append(f"inventory skill '{name}' has no slash command")
+    # 4. Every slash command references a skill in the inventory.
+    command_targets = set()
+    for cmd in sorted(commands_dir.glob("*.md")):
+        m = re.search(r"Load the ([a-z0-9-]+) skill", cmd.read_text())
+        if not m:
+            errors.append(f"{cmd.name}: missing 'Load the <skill> skill' line")
+            continue
+        target = m.group(1)
+        if target not in inventory_names:
+            errors.append(f"{cmd.name}: references skill '{target}' not in inventory.tsv")
+        command_targets.add(target)
 
-if errors:
-    print("\n".join(errors))
-    sys.exit(1)
+    # 5. Every inventory skill is reachable via a slash command.
+    for name in sorted(inventory_names):
+        if name not in command_targets:
+            errors.append(f"inventory skill '{name}' has no slash command")
 
-n_commands = len(list(COMMANDS_DIR.glob("*.md")))
-print(f"OK: {len(skill_names)} skills, {len(inventory_names)} inventory entries, {n_commands} commands")
+    return errors, skill_names, inventory_names
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parent.parent
+    commands_dir = root / "setup-skills" / "commands"
+    inventory = root / "setup-skills" / "scripts" / "inventory.tsv"
+    errors, skill_names, inventory_names = validate(root, commands_dir, inventory)
+    if errors:
+        print("\n".join(errors))
+        return 1
+    n_commands = len(list(commands_dir.glob("*.md")))
+    print(f"OK: {len(skill_names)} skills, {len(inventory_names)} inventory entries, {n_commands} commands")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
