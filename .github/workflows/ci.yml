@@ -25,5 +25,14 @@ jobs:
       - name: Test the validator
         run: python3 scripts/test_validate.py
 
+      - name: Lint and format python
+        run: |
+          python3 -m pip install --quiet ruff
+          ruff check scripts
+          ruff format --check scripts
+
+      - name: Lint markdown
+        run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"
+
       - name: Dry-run install (parse + optional logic, no network)
         run: bash setup-skills/scripts/install.sh --agents opencode --dry-run

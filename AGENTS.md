@@ -35,8 +35,9 @@ Re-running is idempotent.
 ## CI
 
 - `.github/workflows/ci.yml` — on every push: `scripts/validate.py` (frontmatter,
-  inventory, slash-command references), `scripts/test_validate.py`, a dry-run of the
-  installer, plus `bash -n` and `shellcheck` on the scripts.
+  inventory, slash-command references), `scripts/test_validate.py`, ruff (lint +
+  format) on the python, markdownlint on the markdown, a dry-run of the installer,
+  plus `bash -n` and `shellcheck` on the scripts.
 - `.github/workflows/install.yml` — on `main` and manual dispatch: smoke-tests the
   real install and verifies every planned skill lands in `~/.agents/skills`.
 
@@ -51,13 +52,15 @@ Re-running is idempotent.
 
 ## Technical reference
 
-**Where opencode discovers skills** (https://opencode.ai/docs/skills/):
+**Where opencode discovers skills** (<https://opencode.ai/docs/skills/>):
+
 - Project: `.opencode/skills/<name>/SKILL.md`, `.claude/skills/...`, `.agents/skills/...`
 - Global: `~/.config/opencode/skills/...`, `~/.claude/skills/...`, `~/.agents/skills/...`
 - Each skill = a folder with a `SKILL.md` whose frontmatter has `name` (lowercase,
   hyphen-separated, must match folder name) and `description` (required).
 
 **skills.sh CLI** (`npx skills`):
+
 - `npx skills add <owner/repo-or-url> --skill <name>` installs one skill.
 - `--global` installs to `~/.agents/skills` (universal); `--yes` skips prompts.
 - `--agent <name>` selects a target agent (repeat for multiple, or omit for all

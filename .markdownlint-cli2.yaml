@@ -1,0 +1,11 @@
+config:
+  # Skill frontmatter descriptions and prose run long; length is not a problem here.
+  MD013: false
+  # Slash-command wrappers are one-line files, intentionally not documents.
+  MD041: false
+
+globs:
+  - "**/*.md"
+
+ignores:
+  - "node_modules/**"

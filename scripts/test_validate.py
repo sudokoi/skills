@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Fixture-based tests for validate.py's rule groups."""
+
 import sys
 import tempfile
 import unittest
@@ -88,7 +89,9 @@ class ValidationTest(unittest.TestCase):
 
     def test_command_references_unknown_skill(self):
         self.command("baz", "nope")
-        self.assertTrue(any("references skill 'nope' not in inventory.tsv" in e for e in self.errors()))
+        self.assertTrue(
+            any("references skill 'nope' not in inventory.tsv" in e for e in self.errors())
+        )
 
     def test_command_missing_reference_line(self):
         (self.commands / "foo.md").write_text("---\ndescription: x\n---\nJust do the thing.\n")

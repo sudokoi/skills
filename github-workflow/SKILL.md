@@ -21,7 +21,7 @@ Rules for writing GitHub Actions workflows for this user.
 Current latest, verified 2026-08 (re-check before use):
 
 | Action | Latest |
-|---|---|
+| --- | --- |
 | actions/checkout | v7 |
 | actions/setup-node | v7 |
 | actions/setup-python | v7 |

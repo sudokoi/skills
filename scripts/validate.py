@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate the skills repo: SKILL.md frontmatter, inventory.tsv, and slash commands."""
+
 import re
 import sys
 from pathlib import Path
@@ -29,9 +30,13 @@ def validate(root: Path, commands_dir: Path, inventory: Path):
         else:
             name = name_m.group(1).strip()
             if not re.fullmatch(r"[a-z0-9-]+", name):
-                errors.append(f"{skmd.relative_to(root)}: name '{name}' must be lowercase, hyphen-separated")
+                errors.append(
+                    f"{skmd.relative_to(root)}: name '{name}' must be lowercase, hyphen-separated"
+                )
             if name != folder:
-                errors.append(f"{skmd.relative_to(root)}: name '{name}' does not match folder '{folder}'")
+                errors.append(
+                    f"{skmd.relative_to(root)}: name '{name}' does not match folder '{folder}'"
+                )
             skill_names.add(name)
         if not desc_m:
             errors.append(f"{skmd.relative_to(root)}: frontmatter missing 'description'")
@@ -42,7 +47,7 @@ def validate(root: Path, commands_dir: Path, inventory: Path):
         if not s or s.startswith("#"):
             continue
         if s.startswith("optional:"):
-            s = s[len("optional:"):].strip()
+            s = s[len("optional:") :].strip()
         else:
             first = s.split(maxsplit=1)[0]
             if first.endswith(":"):
@@ -53,7 +58,10 @@ def validate(root: Path, commands_dir: Path, inventory: Path):
                 continue
         parts = s.split()
         if len(parts) != 2:
-            errors.append(f"{inventory.relative_to(root)}:{i}: expected '<repo> <skill>', got {len(parts)} fields")
+            errors.append(
+                f"{inventory.relative_to(root)}:{i}: expected '<repo> <skill>', "
+                f"got {len(parts)} fields"
+            )
             continue
         repo, skill = parts
         if skill in inventory_names:
@@ -94,7 +102,10 @@ def main() -> int:
         print("\n".join(errors))
         return 1
     n_commands = len(list(commands_dir.glob("*.md")))
-    print(f"OK: {len(skill_names)} skills, {len(inventory_names)} inventory entries, {n_commands} commands")
+    print(
+        f"OK: {len(skill_names)} skills, {len(inventory_names)} inventory entries, "
+        f"{n_commands} commands"
+    )
     return 0
 
 

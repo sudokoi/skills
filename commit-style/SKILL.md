@@ -13,7 +13,7 @@ including commits an agent makes on their behalf.
 Conventional Commits — a short `<type>: <title>`, then a blank line, then a concise
 pointwise body:
 
-```
+```text
 <type>: <title>
 
 - point one
@@ -62,7 +62,7 @@ Types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `chore`, `style`, `ci`
 
 Good:
 
-```
+```text
 feat: add commit-style skill
 
 - Encode the Conventional Commits format with a short title and pointwise body
@@ -72,6 +72,6 @@ feat: add commit-style skill
 
 Bad:
 
-```
+```text
 phase 1: item 1 - update files
 ```
