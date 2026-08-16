@@ -66,6 +66,7 @@ for name in sorted(skill_names):
         errors.append(f"skill folder '{name}' is not listed in inventory.tsv")
 
 # 4. Every slash command references a skill in the inventory.
+command_targets = set()
 for cmd in sorted(COMMANDS_DIR.glob("*.md")):
     m = re.search(r"Load the ([a-z0-9-]+) skill", cmd.read_text())
     if not m:
@@ -73,6 +74,12 @@ for cmd in sorted(COMMANDS_DIR.glob("*.md")):
         continue
     if m.group(1) not in inventory_names:
         errors.append(f"{cmd.name}: references skill '{m.group(1)}' not in inventory.tsv")
+    command_targets.add(m.group(1))
+
+# 5. Every inventory skill is reachable via a slash command.
+for name in sorted(inventory_names):
+    if name not in command_targets:
+        errors.append(f"inventory skill '{name}' has no slash command")
 
 if errors:
     print("\n".join(errors))
