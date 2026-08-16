@@ -19,27 +19,26 @@ On a fresh machine, install the bootstrap skill and run it:
     npx skills add sudokoi/skills --skill setup-skills --global --yes --agent opencode
 
 `setup-skills` asks which agents to support, then installs every skill listed in
-`setup-skills/scripts/inventory.tsv` via:
-
-    npx skills add <repo> --skill <name> --global --yes --agent <agent>
-
-It can also (re)create the opencode slash commands from `setup-skills/commands/`
-via `scripts/write-commands.sh` (the `--commands` flag). Re-running is idempotent.
+`setup-skills/scripts/inventory.tsv`. See `setup-skills/scripts/install.sh --help`
+for the installer flags (`--commands`, `--include-optional`, `--dry-run`).
+Re-running is idempotent.
 
 ## Adding a custom skill
 
 1. Create `<name>/SKILL.md` — frontmatter `name` (lowercase, hyphenated, matches
    the folder) and a required `description`.
 2. Register it in `setup-skills/scripts/inventory.tsv` as `sudokoi/skills <name>`.
-3. Run `python3 scripts/validate.py` to check the metadata.
+3. Run `python3 scripts/validate.py` and `python3 scripts/test_validate.py` to check
+   the metadata and the validator itself.
 4. Commit following the `commit-style` skill.
 
 ## CI
 
 - `.github/workflows/ci.yml` — on every push: `scripts/validate.py` (frontmatter,
-  inventory, slash-command references) plus `bash -n` and `shellcheck` on the scripts.
-- `.github/workflows/install.yml` — on `main` and weekly: smoke-tests the real
-  install and verifies every inventory skill lands in `~/.agents/skills`.
+  inventory, slash-command references), `scripts/test_validate.py`, a dry-run of the
+  installer, plus `bash -n` and `shellcheck` on the scripts.
+- `.github/workflows/install.yml` — on `main` and manual dispatch: smoke-tests the
+  real install and verifies every planned skill lands in `~/.agents/skills`.
 
 ## Conventions
 

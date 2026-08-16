@@ -28,12 +28,12 @@ the upstream repos and is easy to maintain (add/remove one line to change the se
 
 3. **Install the skills.** The installer and inventory live in `scripts/`, next to
    this `SKILL.md` (i.e. `<repo>/setup-skills/scripts/install.sh` when using the
-   repo checkout). Run it with a comma-separated agent list. Ask whether to include
-   the optional skills too — pass `--include-optional` if yes, and `--commands` to
-   also write the slash commands:
+   repo checkout). Run it with a comma-separated agent list; ask whether to include
+   the optional skills too. See `install.sh --help` for the flags (`--commands`,
+   `--include-optional`, `--dry-run`):
 
    ```bash
-   bash setup-skills/scripts/install.sh --agents opencode,cursor,codex --commands --include-optional
+   bash setup-skills/scripts/install.sh --agents opencode,cursor,codex
    ```
 
    The script loops over every agent and installs each recommended inventory skill

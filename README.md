@@ -35,25 +35,12 @@ npx skills add sudokoi/skills --skill setup-skills --global --yes --agent openco
 ```
 
 Then ask an agent to **Load the `setup-skills` skill and set up my skills**, or run
-the installer directly:
-
-```bash
-bash setup-skills/scripts/install.sh --agents opencode,cursor,codex --commands
-```
-
-`--agents` takes a comma-separated list. Supported names include `opencode`,
-`cursor`, `codex`, `claude`, `gemini`, `windsurf`, `zed`, `warp`,
-`github-copilot`, and more (the skills CLI knows the full list). `claude` and
-`gemini` are mapped to their CLI names `claude-code` and `gemini-cli`.
+the installer directly — see `setup-skills/scripts/install.sh --help` for the flags
+(`--agents`, `--commands`, `--include-optional`, `--dry-run`).
 
 ## Adding or removing a skill
 
-Edit `setup-skills/scripts/inventory.tsv` — add/remove a `<repo> <skill>` line —
-then commit and re-run `setup-skills` on each machine. Installation always uses the
-skills CLI against the source repo:
-
-```text
-npx skills add <repo> --skill <name> --global --yes --agent <agent>
-```
-
-Re-running is idempotent: the CLI overwrites already-installed skills without error.
+Edit `setup-skills/scripts/inventory.tsv` — add/remove a `<repo> <skill>` line
+(prefix it with `optional:` to make it optional) — then commit and re-run
+`setup-skills` on each machine. Re-running is idempotent: the CLI overwrites
+already-installed skills without error.
