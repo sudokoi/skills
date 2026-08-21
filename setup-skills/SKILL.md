@@ -7,7 +7,10 @@ description: Reproduces this repo's curated agent-skill setup on a fresh machine
 
 Reproduces the personal skill set tracked in this repo. The repo is the source of
 truth: `scripts/inventory.tsv` lists every skill, its source repo, and its
-category, and `commands/` holds the opencode slash-command wrappers. This skill
+category, and `commands/` holds a small curated set of opencode slash-command
+wrappers (only skills that need explicit invocation, such as `grill-me`, or a
+parameterized flow, such as `code-review`; everything else is loaded by the
+agent from the skill's own description). This skill
 runs the skills CLI (`npx skills add …`) against that inventory, so installation
 always comes from the upstream repos and is easy to maintain (add/remove one line
 to change the set).
@@ -24,8 +27,9 @@ to change the set).
    preference.
 
 2. **Ask whether to (re)create the opencode slash commands** (optional). These are
-   one-line wrappers in `~/.config/opencode/commands/` that load a skill. Say yes
-   only for opencode setups.
+   the few curated wrappers in `commands/` (grill-me, code-review, tdd,
+   diagnose-bugs), installed to `~/.config/opencode/commands/`. Say yes only for
+   opencode setups.
 
 3. **Install the skills.** The installer and inventory live in `scripts/`, next to
    this `SKILL.md` (i.e. `<repo>/setup-skills/scripts/install.sh` when using the
@@ -59,7 +63,8 @@ to change the set).
 Re-running is safe. `npx skills add` with `--yes` is non-interactive and overwrites
 an already-installed skill without error, so the same command can run on a fresh
 machine or to bring an existing machine back in sync. `write-commands.sh` overwrites
-the command files in place. The remembered category selection only pre-checks the
+the command files in place and prunes previously managed commands that were removed
+from the repo. The remembered category selection only pre-checks the
 tree; every run reconfirms the pick before installing.
 
 ## Adding / removing a skill

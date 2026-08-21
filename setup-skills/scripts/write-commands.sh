@@ -13,6 +13,7 @@ fi
 mkdir -p "$COMMANDS_DEST"
 
 count=0
+pruned=0
 for src in "$COMMANDS_SRC"/*.md; do
   [[ -e "$src" ]] || continue
   name="$(basename "$src")"
@@ -22,4 +23,14 @@ for src in "$COMMANDS_SRC"/*.md; do
   echo "  wrote $dest"
 done
 
-echo "Wrote $count opencode commands to $COMMANDS_DEST"
+for dest in "$COMMANDS_DEST"/*.md; do
+  [[ -e "$dest" ]] || continue
+  grep -q "managed by setup-skills" "$dest" || continue
+  name="$(basename "$dest")"
+  [[ -e "$COMMANDS_SRC/$name" ]] && continue
+  rm "$dest"
+  pruned=$((pruned + 1))
+  echo "  pruned $dest"
+done
+
+echo "Wrote $count opencode commands to $COMMANDS_DEST ($pruned stale removed)"
