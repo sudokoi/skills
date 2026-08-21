@@ -102,8 +102,8 @@ class ValidationTest(unittest.TestCase):
         (self.commands / "foo.md").write_text("---\ndescription: x\n---\nJust do the thing.\n")
         self.assertTrue(any("missing 'Load the <skill> skill' line" in e for e in self.errors()))
 
-    def test_inventory_skill_has_no_command(self):
-        self.assertTrue(any("'foo' has no slash command" in e for e in self.errors()))
+    def test_inventory_skill_without_command_is_ok(self):
+        self.assertEqual(self.errors(), [])
 
 
 if __name__ == "__main__":

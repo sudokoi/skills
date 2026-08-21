@@ -69,7 +69,8 @@ def validate(root: Path, commands_dir: Path, inventory: Path):
         if name != BOOTSTRAP_SKILL and name not in inventory_names:
             errors.append(f"skill folder '{name}' is not listed in inventory.tsv")
 
-    # 4. Every slash command references a skill in the inventory.
+    # 4. Every slash command references a skill in the inventory. Commands are
+    #    opt-in (only skills that need explicit invocation get one).
     command_targets = set()
     for cmd in sorted(commands_dir.glob("*.md")):
         m = re.search(r"Load the ([a-z0-9-]+) skill", cmd.read_text())
@@ -80,11 +81,6 @@ def validate(root: Path, commands_dir: Path, inventory: Path):
         if target not in inventory_names:
             errors.append(f"{cmd.name}: references skill '{target}' not in inventory.tsv")
         command_targets.add(target)
-
-    # 5. Every inventory skill is reachable via a slash command.
-    for name in sorted(inventory_names):
-        if name not in command_targets:
-            errors.append(f"inventory skill '{name}' has no slash command")
 
     return errors, skill_names, inventory_names
 
