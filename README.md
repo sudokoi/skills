@@ -1,46 +1,57 @@
 # Skills
 
-My personal agent skills, version-controlled so they can be reproduced on any
-machine with a single `setup-skills` skill. This is the "skills" equivalent of a
-dotfiles repo: it holds both my own custom skills and the third-party skills I use.
+Just my personal, opinionated set of agent skills. Install `setup-skills` and
+it sets up everything else on any machine the same way.
 
-## What's here
-
-- [`setup-skills/`](setup-skills/SKILL.md) — the bootstrap skill that does the work:
-  - [`scripts/inventory.tsv`](setup-skills/scripts/inventory.tsv) — the source of
-    truth: one `<repo> <skill>` line per installed skill (third-party and self).
-  - [`scripts/install.sh`](setup-skills/scripts/install.sh) — installs every skill
-    via the skills CLI for the agents you choose.
-  - [`scripts/write-commands.sh`](setup-skills/scripts/write-commands.sh) — writes
-    the opencode slash-command wrappers.
-  - [`commands/`](setup-skills/commands) — the opencode slash commands themselves.
-- [`commit-style/`](commit-style/SKILL.md) — my custom commit conventions.
-- [`github-workflow/`](github-workflow/SKILL.md) — my GitHub Actions conventions.
-
-## Custom skills
-
-Custom skills live in this repo as `<name>/SKILL.md` and are installed like any
-other skill, with the repo itself as the source. Add them to `inventory.tsv` as
-`<owner>/<repo> <skill>` (e.g. `sudokoi/skills commit-style`) so `setup-skills`
-installs them on every machine. `setup-skills` itself is the entry point and stays
-out of the inventory.
-
-## Setup on a new machine (or sync)
-
-Install the skill, then run it. It prompts for which agents to support and whether
-to write the opencode slash commands.
+## Setup
 
 ```bash
 npx skills add sudokoi/skills --skill setup-skills --global --yes --agent opencode
 ```
 
-Then ask an agent to **Load the `setup-skills` skill and set up my skills**, or run
-the installer directly — see `setup-skills/scripts/install.sh --help` for the flags
-(`--agents`, `--commands`, `--include-optional`, `--dry-run`).
+Then either ask your agent to load `setup-skills`, or run the installer directly:
 
-## Adding or removing a skill
+```bash
+bash setup-skills/scripts/install.sh --agents opencode
+```
 
-Edit `setup-skills/scripts/inventory.tsv` — add/remove a `<repo> <skill>` line
-(prefix it with `optional:` to make it optional) — then commit and re-run
-`setup-skills` on each machine. Re-running is idempotent: the CLI overwrites
-already-installed skills without error.
+You get a tree of categories to pick from. Nothing is pre-checked on the first
+run; what you pick is remembered (`~/.config/setup-skills/selection`) and
+pre-checked next time. `--all` skips the picker, `--dry-run` prints what would
+happen, `--commands` also writes the opencode slash commands. Running it again
+is safe.
+
+## The inventory
+
+One file decides what exists: `setup-skills/scripts/inventory.tsv`.
+
+```text
+<repo> <skill> <category>
+```
+
+Categories: `core`, `react`, `kotlin`, `architecture`, `process`, `tooling`.
+My own three skills (`setup-skills`, `commit-style`, `github-workflow`) live in
+this repo as normal `<name>/SKILL.md` folders and install from the repo itself,
+same as everything else.
+
+To change the set, edit the tsv, commit, run `setup-skills` again on each
+machine.
+
+## Slash commands
+
+Four, on purpose. Any more and I cannot remember them:
+
+- `/grill-me`
+- `/code-review`
+- `/tdd`
+- `/diagnose-bugs`
+
+Every other skill loads on its own when a task matches its description.
+`scripts/write-commands.sh` copies these into `~/.config/opencode/commands/`
+and deletes ones removed from the repo.
+
+## Checks
+
+`scripts/validate.py` checks frontmatter, the inventory format, and command
+references. CI runs it with its tests, plus shellcheck, ruff, markdownlint,
+and an installer dry-run, on every push.
