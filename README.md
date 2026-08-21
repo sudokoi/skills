@@ -53,5 +53,6 @@ and deletes ones removed from the repo.
 ## Checks
 
 `scripts/validate.py` checks frontmatter, the inventory format, and command
-references. CI runs it with its tests, plus shellcheck, ruff, markdownlint,
-and an installer dry-run, on every push.
+references. `setup-skills/scripts/test_install.sh` covers the installer
+contracts. CI runs both with shellcheck, ruff, markdownlint, and an installer
+dry-run, on every push.
