@@ -18,16 +18,19 @@ On a fresh machine, install the bootstrap skill and run it:
 
     npx skills add sudokoi/skills --skill setup-skills --global --yes --agent opencode
 
-`setup-skills` asks which agents to support, then installs every skill listed in
-`setup-skills/scripts/inventory.tsv`. See `setup-skills/scripts/install.sh --help`
-for the installer flags (`--commands`, `--include-optional`, `--dry-run`).
-Re-running is idempotent.
+`setup-skills` asks which agents to support, then shows a category tree of the
+skills in `setup-skills/scripts/inventory.tsv`; picking a category selects all
+skills under it, and the pick is remembered per machine. See
+`setup-skills/scripts/install.sh --help` for the installer flags (`--all`,
+`--commands`, `--dry-run`). Re-running is idempotent.
 
 ## Adding a custom skill
 
 1. Create `<name>/SKILL.md` — frontmatter `name` (lowercase, hyphenated, matches
    the folder) and a required `description`.
-2. Register it in `setup-skills/scripts/inventory.tsv` as `sudokoi/skills <name>`.
+2. Register it in `setup-skills/scripts/inventory.tsv` as
+   `sudokoi/skills <name> <category>` (category: core, react, kotlin,
+   architecture, process, or tooling).
 3. Run `python3 scripts/validate.py` and `python3 scripts/test_validate.py` to check
    the metadata and the validator itself.
 4. Commit following the `commit-style` skill.
@@ -35,7 +38,7 @@ Re-running is idempotent.
 ## CI
 
 - `.github/workflows/ci.yml` — on every push: `scripts/validate.py` (frontmatter,
-  inventory, slash-command references), `scripts/test_validate.py`, ruff (lint +
+  inventory categories, slash-command references), `scripts/test_validate.py`, ruff (lint +
   format) on the python, markdownlint on the markdown, a dry-run of the installer,
   plus `bash -n` and `shellcheck` on the scripts.
 - `.github/workflows/install.yml` — on `main` and manual dispatch: smoke-tests the

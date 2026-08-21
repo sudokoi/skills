@@ -21,7 +21,7 @@ class ValidationTest(unittest.TestCase):
         self.inventory = self.root / INVENTORY_REL
         self.commands.mkdir(parents=True)
         self.inventory.parent.mkdir(parents=True)
-        self.inventory.write_text("sudokoi/skills foo\n")
+        self.inventory.write_text("sudokoi/skills foo core\n")
         self.skill("foo")
 
     def tearDown(self):
@@ -68,19 +68,24 @@ class ValidationTest(unittest.TestCase):
 
     def test_inventory_bad_field_count(self):
         self.inventory.write_text("sudokoi/skills\n")
-        self.assertTrue(any("expected '<repo> <skill>'" in e for e in self.errors()))
+        self.assertTrue(any("expected '<repo> <skill> <category>'" in e for e in self.errors()))
 
     def test_inventory_unknown_category(self):
-        self.inventory.write_text("weird: sudokoi/skills foo\n")
+        self.inventory.write_text("sudokoi/skills foo weird\n")
         self.assertTrue(any("unknown category 'weird'" in e for e in self.errors()))
 
-    def test_inventory_optional_is_ok(self):
-        self.inventory.write_text("optional: sudokoi/skills foo\n")
+    def test_inventory_all_categories_valid(self):
         self.command("foo", "foo")
+        lines = ["sudokoi/skills foo core"]
+        for cat in ("react", "kotlin", "architecture", "process", "tooling"):
+            skill = f"skill-{cat}"
+            lines.append(f"a/{cat} {skill} {cat}")
+            self.command(skill, skill)
+        self.inventory.write_text("\n".join(lines) + "\n")
         self.assertEqual(self.errors(), [])
 
     def test_inventory_duplicate(self):
-        self.inventory.write_text("a/b foo\nc/d foo\n")
+        self.inventory.write_text("a/b foo core\nc/d foo core\n")
         self.assertTrue(any("duplicate skill 'foo'" in e for e in self.errors()))
 
     def test_self_skill_not_in_inventory(self):

@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 BOOTSTRAP_SKILL = "setup-skills"
+CATEGORIES = ("core", "react", "kotlin", "architecture", "process", "tooling")
 
 
 def validate(root: Path, commands_dir: Path, inventory: Path):
@@ -46,24 +47,19 @@ def validate(root: Path, commands_dir: Path, inventory: Path):
         s = line.strip()
         if not s or s.startswith("#"):
             continue
-        if s.startswith("optional:"):
-            s = s[len("optional:") :].strip()
-        else:
-            first = s.split(maxsplit=1)[0]
-            if first.endswith(":"):
-                errors.append(
-                    f"{inventory.relative_to(root)}:{i}: unknown category "
-                    f"'{first.rstrip(':')}' (known: recommended, optional)"
-                )
-                continue
         parts = s.split()
-        if len(parts) != 2:
+        if len(parts) != 3:
             errors.append(
-                f"{inventory.relative_to(root)}:{i}: expected '<repo> <skill>', "
-                f"got {len(parts)} fields"
+                f"{inventory.relative_to(root)}:{i}: expected '<repo> <skill> <category>', "
+                f"got {len(parts)} field(s)"
             )
             continue
-        repo, skill = parts
+        repo, skill, category = parts
+        if category not in CATEGORIES:
+            errors.append(
+                f"{inventory.relative_to(root)}:{i}: unknown category '{category}' "
+                f"(known: {', '.join(CATEGORIES)})"
+            )
         if skill in inventory_names:
             errors.append(f"{inventory.relative_to(root)}:{i}: duplicate skill '{skill}'")
         inventory_names.add(skill)

@@ -1,29 +1,33 @@
-# One <repo> <skill> pair per line. `#` starts a comment. Blank lines are ignored.
-# Recommended skills are listed bare; optional skills start with `optional:` and are
-# only installed when the installer runs with --include-optional.
+# One <repo> <skill> <category> triple per line. `#` starts a comment.
+# Blank lines are ignored. Category is one of:
+#   core, react, kotlin, architecture, process, tooling
 # The installer runs: npx skills add <repo> --skill <skill> --global --yes --agent <agent>
 
-sudokoi/skills commit-style
-sudokoi/skills github-workflow
-optional: dmmulroy/anti-slop install-anti-slop
-aidrecabrera/bulletproof-react-skill bulletproof-react-architecture
-chrisbanes/skills kotlin-api-design
-chrisbanes/skills kotlin-concurrency-and-flow
-chrisbanes/skills kotlin-control-flow
-Kotlin/kotlin-agent-skills kotlin-tooling-agp9-migration
-leonxlnx/taste-skill design-taste-frontend
-mattpocock/skills codebase-design
-mattpocock/skills code-review
-mattpocock/skills diagnosing-bugs
-mattpocock/skills domain-modeling
-mattpocock/skills grill-me
-mattpocock/skills improve-codebase-architecture
-mattpocock/skills tdd
-mblode/agent-skills codebase-architecture
-shadcn/ui shadcn
-sickn33/agentic-awesome-skills frontend-architecture
-vercel-labs/agent-browser agent-browser
-vercel-labs/agent-skills vercel-composition-patterns
-vercel-labs/agent-skills vercel-react-best-practices
-vercel-labs/agent-skills vercel-react-native-skills
-vercel-labs/skills find-skills
+sudokoi/skills	commit-style	core
+sudokoi/skills	github-workflow	core
+vercel-labs/skills	find-skills	core
+
+aidrecabrera/bulletproof-react-skill	bulletproof-react-architecture	react
+sickn33/agentic-awesome-skills	frontend-architecture	react
+shadcn/ui	shadcn	react
+vercel-labs/agent-skills	vercel-composition-patterns	react
+vercel-labs/agent-skills	vercel-react-best-practices	react
+vercel-labs/agent-skills	vercel-react-native-skills	react
+
+chrisbanes/skills	kotlin-api-design	kotlin
+chrisbanes/skills	kotlin-concurrency-and-flow	kotlin
+chrisbanes/skills	kotlin-control-flow	kotlin
+Kotlin/kotlin-agent-skills	kotlin-tooling-agp9-migration	kotlin
+
+mblode/agent-skills	codebase-architecture	architecture
+mattpocock/skills	codebase-design	architecture
+mattpocock/skills	domain-modeling	architecture
+mattpocock/skills	improve-codebase-architecture	architecture
+
+mattpocock/skills	code-review	process
+mattpocock/skills	diagnosing-bugs	process
+mattpocock/skills	grill-me	process
+mattpocock/skills	tdd	process
+
+vercel-labs/agent-browser	agent-browser	tooling
+leonxlnx/taste-skill	design-taste-frontend	tooling
