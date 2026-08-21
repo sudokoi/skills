@@ -19,7 +19,7 @@ jobs:
       - name: Install skills
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash setup-skills/scripts/install.sh --agents opencode --include-optional
+        run: bash setup-skills/scripts/install.sh --agents opencode --all
 
       - name: Verify installed skills
         run: |
@@ -30,7 +30,7 @@ jobs:
           # Consume the installer's own plan instead of re-parsing the inventory.
           plan = subprocess.run(
               ["bash", "setup-skills/scripts/install.sh", "--agents", "opencode",
-               "--include-optional", "--dry-run"],
+               "--dry-run"],
               capture_output=True, text=True, check=True,
           ).stdout
           planned = [
