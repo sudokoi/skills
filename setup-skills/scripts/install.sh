@@ -2,8 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INVENTORY="$SCRIPT_DIR/inventory.tsv"
-SELECTION_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/setup-skills/selection"
+INVENTORY="${SKILLS_INVENTORY:-$SCRIPT_DIR/inventory.tsv}"
+SELECTION_FILE="${SKILLS_SELECTION_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/setup-skills/selection}"
 GLOBAL_SKILLS_DIR="$HOME/.agents/skills"
 
 CATEGORIES=(core react kotlin architecture process tooling)
@@ -20,6 +20,7 @@ AGENTS=""
 ALL_MODE=0
 WITH_COMMANDS=0
 DRY_RUN=0
+PRINT_SELECTION=0
 
 usage() {
   cat <<'USAGE'
@@ -32,11 +33,14 @@ Usage: install.sh --agents <a,b,...> [--all] [--commands] [--dry-run]
   --commands            Also (re)create the opencode slash commands in
                         ~/.config/opencode/commands/.
   --dry-run             Print the full plan instead of installing (never interactive).
+  --print-selection     Print the remembered category selection (known entries only)
+                        and exit.
 
 Without --all (and outside --dry-run) an interactive category tree is shown.
 The picked categories are remembered in
 ${XDG_CONFIG_HOME:-~/.config}/setup-skills/selection and pre-checked on the
-next run.
+next run. SKILLS_INVENTORY and SKILLS_SELECTION_FILE override the default
+inventory and selection paths.
 
 Examples:
   install.sh --agents opencode
@@ -64,6 +68,10 @@ while [[ $# -gt 0 ]]; do
       DRY_RUN=1
       shift
       ;;
+    --print-selection)
+      PRINT_SELECTION=1
+      shift
+      ;;
     -h | --help)
       usage
       exit 0
@@ -76,7 +84,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$AGENTS" ]]; then
+if [[ -z "$AGENTS" && "$PRINT_SELECTION" -eq 0 ]]; then
   echo "error: --agents is required (comma-separated list)" >&2
   usage >&2
   exit 1
@@ -90,7 +98,7 @@ for a in $AGENTS; do
 done
 IFS="$oldIFS"
 
-if [[ ${#AGENT_LIST[@]} -eq 0 ]]; then
+if [[ ${#AGENT_LIST[@]} -eq 0 && "$PRINT_SELECTION" -eq 0 ]]; then
   echo "error: no agents to install to" >&2
   exit 1
 fi
@@ -143,6 +151,28 @@ else
   RESET="\033[0m"
 fi
 
+SEL=(0 0 0 0 0 0)
+
+load_selection() {
+  local c ci
+  [[ -r "$SELECTION_FILE" ]] || return 0
+  while IFS= read -r c || [[ -n "$c" ]]; do
+    c="${c%$'\r'}"
+    for ci in "${!CATEGORIES[@]}"; do
+      if [[ "${CATEGORIES[$ci]}" == "$c" ]]; then SEL[ci]=1; fi
+    done
+  done < "$SELECTION_FILE"
+  return 0
+}
+
+if [[ "$PRINT_SELECTION" -eq 1 ]]; then
+  load_selection
+  for ci in "${!CATEGORIES[@]}"; do
+    if [[ "${SEL[ci]}" -eq 1 ]]; then printf '%s\n' "${CATEGORIES[$ci]}"; fi
+  done
+  exit 0
+fi
+
 if [[ "$DRY_RUN" -eq 1 ]]; then
   echo "Agents: ${AGENT_LIST[*]}"
   echo "Inventory: $INVENTORY"
@@ -158,8 +188,6 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   echo "Plan: $planned install(s) across ${#AGENT_LIST[@]} agent(s)."
   exit 0
 fi
-
-SEL=(0 0 0 0 0 0)
 
 INTERACTIVE=0
 if [[ "$ALL_MODE" -eq 0 ]]; then
@@ -184,13 +212,8 @@ for ci in "${!CATEGORIES[@]}"; do
   CAT_INSTALLED+=("$inst")
 done
 
-if [[ "$INTERACTIVE" -eq 1 && -r "$SELECTION_FILE" ]]; then
-  while IFS= read -r c || [[ -n "$c" ]]; do
-    c="${c%$'\r'}"
-    for ci in "${!CATEGORIES[@]}"; do
-      [[ "${CATEGORIES[$ci]}" == "$c" ]] && SEL[ci]=1
-    done
-  done < "$SELECTION_FILE"
+if [[ "$INTERACTIVE" -eq 1 ]]; then
+  load_selection
 fi
 
 if [[ "$ALL_MODE" -eq 1 ]]; then

@@ -38,7 +38,8 @@ skills under it, and the pick is remembered per machine. See
 ## CI
 
 - `.github/workflows/ci.yml` — on every push: `scripts/validate.py` (frontmatter,
-  inventory categories, slash-command references), `scripts/test_validate.py`, ruff (lint +
+  inventory categories, slash-command references), `scripts/test_validate.py`,
+  `setup-skills/scripts/test_install.sh` (installer contracts), ruff (lint +
   format) on the python, markdownlint on the markdown, a dry-run of the installer,
   plus `bash -n` and `shellcheck` on the scripts.
 - `.github/workflows/install.yml` — on `main` and manual dispatch: smoke-tests the

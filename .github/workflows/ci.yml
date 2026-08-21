@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Check bash syntax
-        run: bash -n setup-skills/scripts/install.sh setup-skills/scripts/write-commands.sh
+        run: bash -n setup-skills/scripts/install.sh setup-skills/scripts/write-commands.sh setup-skills/scripts/test_install.sh
 
       - name: ShellCheck
         run: |
@@ -24,6 +24,9 @@ jobs:
 
       - name: Test the validator
         run: python3 scripts/test_validate.py
+
+      - name: Test the installer
+        run: bash setup-skills/scripts/test_install.sh
 
       - name: Lint and format python
         run: |
